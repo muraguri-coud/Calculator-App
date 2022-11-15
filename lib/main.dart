@@ -1,14 +1,30 @@
-// ignore_for_file: prefer_const_constructors, prefer_conditional_assignment
+// ignore_for_file: prefer_const_constructors, prefer_conditional_assignment, unnecessary_this
 
 import 'package:calculator/widgets/Screen.dart';
 import 'package:calculator/widgets/answer.dart';
+import 'package:desktop_window/desktop_window.dart';
+import 'package:eval_ex/expression.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+void main() async {
+  // WidgetsFlutterBinding.ensureInitialized();
+  // Size size = await DesktopWindow.getWindowSize();
+  // print(size);
+  // await DesktopWindow.setWindowSize(Size(500, 500));
+
+  // await DesktopWindow.setMinWindowSize(Size(400, 400));
+  // await DesktopWindow.setMaxWindowSize(Size(800, 800));
+
+  // await DesktopWindow.resetMaxWindowSize();
+  // await DesktopWindow.toggleFullScreen();
+  // bool isFullScreen = await DesktopWindow.getFullScreen();
+  // await DesktopWindow.setFullScreen(true);
+  // await DesktopWindow.setFullScreen(false);
+
   runApp(MaterialApp(
       title: 'My Calculator',
       showSemanticsDebugger: false,
-      home: Scaffold(body: const MyApp())));
+      home: Scaffold(body: SafeArea(child: const MyApp()))));
 }
 
 class MyApp extends StatefulWidget {
@@ -19,18 +35,36 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  var expression = '';
+  String? expression = '';
   int? firstOperand;
   String? operator;
+  // String? operator2;
   int? secondOperand;
-  int? result;
+  String? result;
+  double memory = 0;
 
-  // numberPassed(int value) {
-  //   this.expression = '${this.expression}${value}';
-  //   setState(() {
+  elementPassed(value) {
+    this.expression = '${this.expression}${value}';
+    setState(() {});
+  }
 
-  //   });
-  // }
+  addInMemory() {
+    if (result != null) {
+      memory = memory + (double.parse((result ?? "0.")));
+      print(memory);
+      setState(() {});
+    }
+  }
+
+  removeInMemory() {
+    memory = memory - (double.parse((result ?? "0.")));
+    setState(() {});
+  }
+
+  getInMemory() {
+    expression = memory.toString();
+    setState(() {});
+  }
 
   numberPressed(int number) {
     setState(() {
@@ -61,60 +95,56 @@ class _MyAppState extends State<MyApp> {
       if (firstOperand == null) {
         firstOperand = 0;
       }
+
       this.operator = operator;
     });
   }
 
   calculateResult() {
-    if (operator == null || secondOperand == null) {
-      return;
-    }
-    setState(() {
-      switch (operator) {
-        case '+':
-          result = (firstOperand! + secondOperand!);
-          break;
-        case '-':
-          result = firstOperand! - secondOperand!;
-          break;
-        case '*':
-          result = firstOperand! * secondOperand!;
-          break;
-        case '/':
-          if (secondOperand == 0) {
-            return;
-          }
-          result = firstOperand! ~/ secondOperand!;
-          break;
-      }
-     
-
-      firstOperand = result;
-      operator = null;
-      secondOperand = null;
-     // result = null;
-    });
+    Expression exp = Expression(expression ?? "0");
+    //print(exp.eval().toString());
+    result = exp.eval().toString();
+    setState(() {});
   }
 
   clear() {
     setState(() {
       result = null;
       operator = null;
+
       secondOperand = null;
       firstOperand = null;
+      expression = "";
+      memory = 0;
+    });
+  }
+
+  del() {
+    setState(() {
+      if (expression != null) {
+        // expression = expression?.substring(0, expression?.length ?? 1 - 1);
+        print(expression?.length);
+        if ((expression?.length ?? 0) >= 1) {
+          expression =
+              expression?.replaceRange((expression?.length ?? 1) - 1, null, '');
+          print(expression);
+          //  secondOperand?.remove();
+        }
+      }
     });
   }
 
   displayResults() {
     if (result != null) {
-      print(result);
       return '$result';
     }
     return '0';
   }
 
   _getDisplayText() {
-    print(result);
+    // if (operator2 != null && secondOperand != null) {
+    //   return '$firstOperand$operator$secondOperand$operator2';
+    // }
     if (secondOperand != null) {
       return '$firstOperand$operator$secondOperand';
     }
@@ -134,7 +164,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
-      constraints: BoxConstraints(maxWidth: 350),
+      //constraints: BoxConstraints(maxWidth: 350),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
@@ -148,7 +178,7 @@ class _MyAppState extends State<MyApp> {
                     alignment: Alignment.center,
                     child: Screenview(
                       result: displayResults(),
-                      expression: _getDisplayText(),
+                      expression: expression,
                     ),
                     margin: EdgeInsets.all(20),
                     height: 100,
@@ -235,7 +265,10 @@ class _MyAppState extends State<MyApp> {
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               InkWell(
-                                onTap: () => numberPressed(7),
+                                onTap: () {
+                                  numberPressed(7);
+                                  elementPassed(7);
+                                },
                                 child: Container(
                                   alignment: Alignment.center,
                                   child: Text("7",
@@ -255,7 +288,10 @@ class _MyAppState extends State<MyApp> {
                                 ),
                               ),
                               InkWell(
-                                onTap: () => numberPressed(8),
+                                onTap: () {
+                                  numberPressed(8);
+                                  elementPassed(8);
+                                },
                                 child: Container(
                                   alignment: Alignment.center,
                                   child: Text("8",
@@ -275,7 +311,10 @@ class _MyAppState extends State<MyApp> {
                                 ),
                               ),
                               InkWell(
-                                onTap: () => numberPressed(9),
+                                onTap: () {
+                                  numberPressed(9);
+                                  elementPassed(9);
+                                },
                                 child: Container(
                                   alignment: Alignment.center,
                                   child: Text("9",
@@ -295,7 +334,10 @@ class _MyAppState extends State<MyApp> {
                                 ),
                               ),
                               InkWell(
-                                onTap: () => operatorPressed("/"),
+                                onTap: () {
+                                  operatorPressed("/");
+                                  elementPassed("/");
+                                },
                                 child: Container(
                                   alignment: Alignment.center,
                                   child: Text("/",
@@ -319,7 +361,10 @@ class _MyAppState extends State<MyApp> {
                         ),
                       ),
                       InkWell(
-                        onTap: () => numberPressed(0),
+                        onTap: () {
+                          numberPressed(0);
+                          elementPassed(0);
+                        },
                         child: Container(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -347,10 +392,13 @@ class _MyAppState extends State<MyApp> {
                               //     color: Color.fromARGB(
                               //         255, 92, 31, 52)),
                               InkWell(
-                                onTap: () => operatorPressed(","),
+                                onTap: () {
+                                  operatorPressed("%");
+                                  elementPassed("%");
+                                },
                                 child: Container(
                                   alignment: Alignment.center,
-                                  child: Text(",",
+                                  child: Text("%",
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                           fontSize: 30,
@@ -397,7 +445,10 @@ class _MyAppState extends State<MyApp> {
                   flex: 2,
                   child: Container(
                     child: InkWell(
-                      onTap: () => operatorPressed("+"),
+                      onTap: () {
+                        operatorPressed("+");
+                        elementPassed("+");
+                      },
                       child: Container(
                         alignment: Alignment.center,
                         child: Text("+",
@@ -435,7 +486,10 @@ class _MyAppState extends State<MyApp> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             InkWell(
-              onTap: () => numberPressed(4),
+              onTap: () {
+                numberPressed(4);
+                elementPassed(4);
+              },
               child: Container(
                 alignment: Alignment.center,
                 child: Text("4",
@@ -453,7 +507,10 @@ class _MyAppState extends State<MyApp> {
               ),
             ),
             InkWell(
-              onTap: () => numberPressed(5),
+              onTap: () {
+                numberPressed(5);
+                elementPassed(5);
+              },
               child: Container(
                 alignment: Alignment.center,
                 child: Text("5",
@@ -471,7 +528,10 @@ class _MyAppState extends State<MyApp> {
               ),
             ),
             InkWell(
-              onTap: () => numberPressed(6),
+              onTap: () {
+                numberPressed(6);
+                elementPassed(6);
+              },
               child: Container(
                 alignment: Alignment.center,
                 child: Text("6",
@@ -489,7 +549,10 @@ class _MyAppState extends State<MyApp> {
               ),
             ),
             InkWell(
-              onTap: () => operatorPressed("*"),
+              onTap: () {
+                operatorPressed("*");
+                elementPassed("*");
+              },
               child: Container(
                 alignment: Alignment.center,
                 child: Text("*",
@@ -507,7 +570,10 @@ class _MyAppState extends State<MyApp> {
               ),
             ),
             InkWell(
-              onTap: () => operatorPressed("-"),
+              onTap: () {
+                operatorPressed("-");
+                elementPassed("-");
+              },
               child: Container(
                 alignment: Alignment.center,
                 child: Text("−",
@@ -538,7 +604,10 @@ class _MyAppState extends State<MyApp> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             InkWell(
-              onTap: () => numberPressed(1),
+              onTap: () {
+                numberPressed(1);
+                elementPassed(1);
+              },
               child: Container(
                 alignment: Alignment.center,
                 child: Text("1",
@@ -556,7 +625,10 @@ class _MyAppState extends State<MyApp> {
               ),
             ),
             InkWell(
-              onTap: () => numberPressed(2),
+              onTap: () {
+                numberPressed(2);
+                elementPassed(2);
+              },
               child: Container(
                 alignment: Alignment.center,
                 child: Text("2",
@@ -574,7 +646,10 @@ class _MyAppState extends State<MyApp> {
               ),
             ),
             InkWell(
-              onTap: () => numberPressed(3),
+              onTap: () {
+                numberPressed(3);
+                elementPassed(3);
+              },
               child: Container(
                 alignment: Alignment.center,
                 child: Text("3",
@@ -592,10 +667,13 @@ class _MyAppState extends State<MyApp> {
               ),
             ),
             InkWell(
-              onTap: () => operatorPressed("="),
+              onTap: () {
+                operatorPressed("(");
+                elementPassed("(");
+              },
               child: Container(
                 alignment: Alignment.center,
-                child: Text("±",
+                child: Text("(",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                         fontSize: 30,
@@ -610,10 +688,13 @@ class _MyAppState extends State<MyApp> {
               ),
             ),
             InkWell(
-              onTap: () => operatorPressed("%"),
+              onTap: () {
+                operatorPressed(")");
+                elementPassed(")");
+              },
               child: Container(
                 alignment: Alignment.center,
-                child: Text("%",
+                child: Text(")",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                         fontSize: 30,
@@ -641,15 +722,14 @@ class _MyAppState extends State<MyApp> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             InkWell(
-              onTap: () => operatorPressed("CE"),
+              //onTap: () => clear(),
               child: Container(
                 alignment: Alignment.center,
-                child: Text("CE",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto')),
+                child: IconButton(
+                    onPressed: () {
+                      del();
+                    },
+                    icon: Icon(Icons.backspace)),
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
@@ -677,7 +757,7 @@ class _MyAppState extends State<MyApp> {
               ),
             ),
             InkWell(
-              onTap: () => operatorPressed("M+"),
+              onTap: () => addInMemory(),
               child: Container(
                 alignment: Alignment.center,
                 child: Text("M+",
@@ -695,7 +775,7 @@ class _MyAppState extends State<MyApp> {
               ),
             ),
             InkWell(
-              onTap: () => operatorPressed("M-"),
+              onTap: () => removeInMemory(),
               child: Container(
                 alignment: Alignment.center,
                 child: Text("M-",
@@ -713,7 +793,7 @@ class _MyAppState extends State<MyApp> {
               ),
             ),
             InkWell(
-              onTap: () => operatorPressed("MR"),
+              onTap: () => getInMemory(),
               child: Container(
                 alignment: Alignment.center,
                 child: Text("MR",
