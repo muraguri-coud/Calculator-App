@@ -21,20 +21,26 @@ class Screenview extends StatelessWidget {
           Expanded(
               child: Text("${expression}",
                   textAlign: TextAlign.left,
+                  maxLines: 2,
+                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.w500,
                       fontFamily: 'DS-DIGIT'))),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text("${result}",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w500,
-                      fontFamily: 'DS-DIGIT')),
-            ],
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text("${result}",
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'DS-DIGIT')),
+              ],
+            ),
           ),
         ],
       ),

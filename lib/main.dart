@@ -49,12 +49,13 @@ class _MyAppState extends State<MyApp> {
   @override
   initState() {
     super.initState();
-   
+
     loadStorage();
   }
 
   loadStorage() async {
     prefs = await SharedPreferences.getInstance();
+    expressionHistory.clear();
     for (var element in (prefs?.getKeys().toList() ?? [])) {
       var theli = [
         element ?? "",
@@ -82,11 +83,6 @@ class _MyAppState extends State<MyApp> {
 
   getInMemory() {
     expression = memory.toString();
-    setState(() {});
-  }
-
-  getFromSharedPreference(express) {
-    expression = express;
     setState(() {});
   }
 
@@ -194,12 +190,17 @@ class _MyAppState extends State<MyApp> {
     return '0';
   }
 
+  getFromSharedPreference(express) {
+    expression = express;
+    setState(() {});
+  }
+
   removeFromSharedPreference(value) {
     if (value != null) {
-      prefs?.remove(value);
-      expressionHistory.remove(value);
-          loadStorage();
-      setState(() {});
+      prefs?.remove(value).then((value) {
+        expressionHistory.remove(value);
+        loadStorage();
+      });
     }
     setState(() {});
   }
@@ -285,6 +286,7 @@ class _MyAppState extends State<MyApp> {
                   //  Flexible(child: lastTwoRows()),
 
                   Container(
+                    //color: Colors.amber,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
@@ -294,9 +296,10 @@ class _MyAppState extends State<MyApp> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Container(
-                                //color: Color.fromARGB(255, 119, 42, 112),
+
+                             //   color: Color.fromARGB(255, 119, 42, 112),
                                 width: double.maxFinite,
-                                height: 100,
+                                height: 60,
 
                                 child: Row(
                                   mainAxisAlignment:
@@ -394,9 +397,9 @@ class _MyAppState extends State<MyApp> {
                                 ),
                               ),
                               Container(
-                                // color: Color.fromARGB(255, 119, 42, 112),
+                                // color: Color.fromARGB(255, 42, 119, 65),
                                 width: double.maxFinite,
-                                height: 100,
+                                height: 60,
                                 child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -408,7 +411,7 @@ class _MyAppState extends State<MyApp> {
                                       },
                                       child: Container(
                                         alignment: Alignment.center,
-                                        width: 150,
+                                        width: 120,
                                         height: 50,
                                         child: Text("0",
                                             textAlign: TextAlign.center,
@@ -473,7 +476,7 @@ class _MyAppState extends State<MyApp> {
                           ),
                         ),
                         Flexible(
-                          flex: 3,
+                          flex: 2,
                           child: InkWell(
                             onTap: () {
                               elementPassed("+");
@@ -481,7 +484,7 @@ class _MyAppState extends State<MyApp> {
                             child: Container(
                               alignment: Alignment.center,
                               width: 50,
-                              height: 150,
+                              height: 110,
                               child: Text("+",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
@@ -501,7 +504,8 @@ class _MyAppState extends State<MyApp> {
                   ),
                 ]),
               )),
-          Flexible(
+          Expanded(
+            flex: 2,
             child: Container(
               height: 200,
               child: ListView.builder(
@@ -513,7 +517,7 @@ class _MyAppState extends State<MyApp> {
                     return InkWell(
                       child: Card(
                         color: Colors.white,
-                        elevation: 5.0,
+                        elevation: 2.0,
                         child: ListTile(
                           leading: CircleAvatar(
                             backgroundColor: Colors.black,
@@ -531,7 +535,6 @@ class _MyAppState extends State<MyApp> {
                             ),
                             onTap: () {
                               removeFromSharedPreference(coun);
-                           
                             },
                           ),
                         ),
