@@ -1,26 +1,16 @@
 // ignore_for_file: prefer_const_constructors, prefer_conditional_assignment, unnecessary_this
 
+import 'dart:math';
+
+import 'package:calculator/tools/constants.dart';
 import 'package:calculator/widgets/Screen.dart';
 import 'package:calculator/widgets/answer.dart';
 import 'package:desktop_window/desktop_window.dart';
 import 'package:eval_ex/expression.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
-  // WidgetsFlutterBinding.ensureInitialized();
-  // Size size = await DesktopWindow.getWindowSize();
-  // print(size);
-  // await DesktopWindow.setWindowSize(Size(500, 500));
-
-  // await DesktopWindow.setMinWindowSize(Size(400, 400));
-  // await DesktopWindow.setMaxWindowSize(Size(800, 800));
-
-  // await DesktopWindow.resetMaxWindowSize();
-  // await DesktopWindow.toggleFullScreen();
-  // bool isFullScreen = await DesktopWindow.getFullScreen();
-  // await DesktopWindow.setFullScreen(true);
-  // await DesktopWindow.setFullScreen(false);
-
   runApp(MaterialApp(
       title: 'My Calculator',
       showSemanticsDebugger: false,
@@ -42,10 +32,39 @@ class _MyAppState extends State<MyApp> {
   int? secondOperand;
   String? result;
   double memory = 0;
+  SharedPreferences? prefs;
+  List expressionHistory = List.empty(growable: true);
 
   elementPassed(value) {
-    this.expression = '${this.expression}${value}';
+    // print("Am called");
+    try {
+      this.expression = '${this.expression}${value}';
+    } catch (e) {
+      expression = "Too long expression";
+    }
+
     setState(() {});
+  }
+
+  @override
+  initState() {
+    super.initState();
+   
+    loadStorage();
+  }
+
+  loadStorage() async {
+    prefs = await SharedPreferences.getInstance();
+    for (var element in (prefs?.getKeys().toList() ?? [])) {
+      var theli = [
+        element ?? "",
+        prefs?.getString(element) ?? "",
+      ];
+
+      expressionHistory.add(theli);
+    }
+    setState(() {});
+    print(prefs);
   }
 
   addInMemory() {
@@ -63,6 +82,11 @@ class _MyAppState extends State<MyApp> {
 
   getInMemory() {
     expression = memory.toString();
+    setState(() {});
+  }
+
+  getFromSharedPreference(express) {
+    expression = express;
     setState(() {});
   }
 
@@ -101,9 +125,19 @@ class _MyAppState extends State<MyApp> {
   }
 
   calculateResult() {
-    Expression exp = Expression(expression ?? "0");
-    //print(exp.eval().toString());
-    result = exp.eval().toString();
+    try {
+      Expression exp = Expression(expression ?? "0");
+      //print(exp.eval().toString());
+      result = exp.eval().toString();
+      prefs?.setString(
+          Random.secure().nextDouble().toString(), expression ?? "");
+
+      setState(() {});
+    } catch (e) {
+      expression = "Syntax Error";
+      print("this is the error: $e");
+    }
+
     setState(() {});
   }
 
@@ -160,6 +194,16 @@ class _MyAppState extends State<MyApp> {
     return '0';
   }
 
+  removeFromSharedPreference(value) {
+    if (value != null) {
+      prefs?.remove(value);
+      expressionHistory.remove(value);
+          loadStorage();
+      setState(() {});
+    }
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -174,644 +218,661 @@ class _MyAppState extends State<MyApp> {
               color: Colors.blue,
               child: Column(
                 children: [
-                  Container(
-                    alignment: Alignment.center,
-                    child: Screenview(
-                      result: displayResults(),
-                      expression: expression,
+                  Flexible(
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: Screenview(
+                        result: displayResults(),
+                        expression: expression,
+                      ),
+                      margin: EdgeInsets.all(20),
+                      height: 100,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                            // begin: Alignment.topLeft,
+                            tileMode: TileMode.decal,
+                            transform: GradientRotation(100),
+                            stops: [
+                              0,
+                              0.1,
+                              0.2,
+                              0.3,
+                              0.4,
+                              0.5,
+                              0.6,
+                              0.7,
+                              0.8,
+                              0.9,
+                              1
+                            ],
+                            colors: [
+                              Color.fromARGB(209, 221, 207, 255),
+                              Color.fromARGB(193, 213, 201, 255),
+                              Color.fromARGB(209, 221, 207, 255),
+                              Color.fromARGB(193, 213, 201, 255),
+                              Color.fromARGB(209, 221, 207, 255),
+                              Color.fromARGB(193, 213, 201, 255),
+                              Color.fromARGB(209, 221, 207, 255),
+                              Color.fromARGB(193, 213, 201, 255),
+                              Color.fromARGB(209, 221, 207, 255),
+                              Color.fromARGB(193, 213, 201, 255),
+                              Color.fromARGB(209, 221, 207, 255),
+                            ]),
+                        // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                        boxShadow: [
+                          BoxShadow(color: Colors.grey, spreadRadius: 3)
+                        ],
+                        color: Color(0xFFd8f0fa),
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      width: double.maxFinite,
                     ),
-                    margin: EdgeInsets.all(20),
-                    height: 100,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                          // begin: Alignment.topLeft,
-                          tileMode: TileMode.decal,
-                          transform: GradientRotation(100),
-                          stops: [
-                            0,
-                            0.1,
-                            0.2,
-                            0.3,
-                            0.4,
-                            0.5,
-                            0.6,
-                            0.7,
-                            0.8,
-                            0.9,
-                            1
-                          ],
-                          colors: [
-                            Color.fromARGB(209, 221, 207, 255),
-                            Color.fromARGB(193, 213, 201, 255),
-                            Color.fromARGB(209, 221, 207, 255),
-                            Color.fromARGB(193, 213, 201, 255),
-                            Color.fromARGB(209, 221, 207, 255),
-                            Color.fromARGB(193, 213, 201, 255),
-                            Color.fromARGB(209, 221, 207, 255),
-                            Color.fromARGB(193, 213, 201, 255),
-                            Color.fromARGB(209, 221, 207, 255),
-                            Color.fromARGB(193, 213, 201, 255),
-                            Color.fromARGB(209, 221, 207, 255),
-                          ]),
-                      // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                      boxShadow: [
-                        BoxShadow(color: Colors.grey, spreadRadius: 3)
-                      ],
-                      color: Color(0xFFd8f0fa),
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
-                    width: double.maxFinite,
                   )
                 ],
               ),
             ),
           ),
-          Expanded(
-              flex: 4,
+          Flexible(
+              flex: 3,
               child: Container(
                 width: double.maxFinite,
+                //image: AssetImage(AssetImageHelper.backgroud_image))),
                 color: Color(0xFF8dd8f7),
                 child: Column(children: [
-                  _buildMathematicalOperation(),
-                  buildSecondRow(),
-                  buildThirdRow(),
-                  lastTwoRows(),
+                  Flexible(child: _buildMathematicalOperation()),
+                  Flexible(child: buildSecondRow()),
+                  Flexible(child: buildThirdRow()),
+                  //  Flexible(child: lastTwoRows()),
+
+                  Container(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Flexible(
+                          flex: 5,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                //color: Color.fromARGB(255, 119, 42, 112),
+                                width: double.maxFinite,
+                                height: 100,
+
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        numberPressed(7);
+                                        elementPassed(7);
+                                      },
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        width: 50,
+                                        height: 50,
+                                        child: Text("7",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                fontSize: 30,
+                                                fontWeight: FontWeight.w500,
+                                                fontFamily: 'Roboto')),
+                                        decoration: BoxDecoration(
+                                            // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                                            color: Color(0xFFd8f0fa),
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(10))),
+                                      ),
+                                    ),
+                                    InkWell(
+                                      onTap: () {
+                                        numberPressed(8);
+                                        elementPassed(8);
+                                      },
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        width: 50,
+                                        height: 50,
+                                        child: Text("8",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                fontSize: 30,
+                                                fontWeight: FontWeight.w500,
+                                                fontFamily: 'Roboto')),
+                                        decoration: BoxDecoration(
+                                            // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                                            color: Color(0xFFd8f0fa),
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(10))),
+                                      ),
+                                    ),
+                                    InkWell(
+                                      onTap: () {
+                                        numberPressed(8);
+                                        elementPassed(8);
+                                      },
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        width: 50,
+                                        height: 50,
+                                        child: Text("8",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                fontSize: 30,
+                                                fontWeight: FontWeight.w500,
+                                                fontFamily: 'Roboto')),
+                                        decoration: BoxDecoration(
+                                            // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                                            color: Color(0xFFd8f0fa),
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(10))),
+                                      ),
+                                    ),
+                                    InkWell(
+                                      onTap: () {
+                                        numberPressed(9);
+                                        elementPassed(9);
+                                      },
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        width: 50,
+                                        height: 50,
+                                        child: Text("9",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                fontSize: 30,
+                                                fontWeight: FontWeight.w500,
+                                                fontFamily: 'Roboto')),
+                                        decoration: BoxDecoration(
+                                            // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                                            color: Color(0xFFd8f0fa),
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(10))),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                // color: Color.fromARGB(255, 119, 42, 112),
+                                width: double.maxFinite,
+                                height: 100,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        numberPressed(0);
+                                        elementPassed(0);
+                                      },
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        width: 150,
+                                        height: 50,
+                                        child: Text("0",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                fontSize: 30,
+                                                fontWeight: FontWeight.w500,
+                                                fontFamily: 'Roboto')),
+                                        decoration: BoxDecoration(
+                                            // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                                            color: Color(0xFFd8f0fa),
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(10))),
+                                      ),
+                                    ),
+                                    InkWell(
+                                      onTap: () {
+                                        elementPassed("%");
+                                      },
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        width: 50,
+                                        height: 50,
+                                        child: Text("%",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                fontSize: 30,
+                                                fontWeight: FontWeight.w500,
+                                                fontFamily: 'Roboto')),
+                                        decoration: BoxDecoration(
+                                            // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                                            color: Color(0xFFd8f0fa),
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(10))),
+                                      ),
+                                    ),
+                                    InkWell(
+                                      onTap: () {
+                                        calculateResult();
+                                        loadStorage();
+                                      },
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        width: 50,
+                                        height: 50,
+                                        child: Text("=",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                fontSize: 30,
+                                                fontWeight: FontWeight.w500,
+                                                fontFamily: 'Roboto')),
+                                        decoration: BoxDecoration(
+                                            // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                                            color: Color(0xFFd8f0fa),
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(10))),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Flexible(
+                          flex: 3,
+                          child: InkWell(
+                            onTap: () {
+                              elementPassed("+");
+                            },
+                            child: Container(
+                              alignment: Alignment.center,
+                              width: 50,
+                              height: 150,
+                              child: Text("+",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: 'Roboto')),
+                              decoration: BoxDecoration(
+                                  // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                                  color: Color(0xFFd8f0fa),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(10))),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ]),
-              ))
+              )),
+          Flexible(
+            child: Container(
+              height: 200,
+              child: ListView.builder(
+                  itemCount: expressionHistory.length,
+                  itemBuilder: ((context, index) {
+                    var expre = expressionHistory.reversed.toList()[index][1];
+                    var coun = expressionHistory.reversed.toList()[index][0];
+
+                    return InkWell(
+                      child: Card(
+                        color: Colors.white,
+                        elevation: 5.0,
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: Colors.black,
+                            child: Icon(Icons.assessment),
+                          ),
+                          title: Text(expre),
+                          onTap: () {
+                            getFromSharedPreference(expre);
+                            calculateResult();
+                          },
+                          trailing: GestureDetector(
+                            child: Icon(
+                              Icons.delete,
+                              color: Colors.grey,
+                            ),
+                            onTap: () {
+                              removeFromSharedPreference(coun);
+                           
+                            },
+                          ),
+                        ),
+                      ),
+                    );
+                  })),
+            ),
+          )
         ],
       ),
     );
   }
 
-  Flexible lastTwoRows() {
-    return Flexible(
-      child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 0),
-          child: Container(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Flexible(
-                  flex: 9,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 10, horizontal: 0),
-                        child: Container(
-                          width: double.infinity,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              InkWell(
-                                onTap: () {
-                                  numberPressed(7);
-                                  elementPassed(7);
-                                },
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  child: Text("7",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          fontSize: 30,
-                                          fontWeight: FontWeight.w500,
-                                          fontFamily: 'Roboto')),
-                                  width: 50,
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                                    color: Color(0xFFd8f0fa),
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10)),
-                                  ),
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () {
-                                  numberPressed(8);
-                                  elementPassed(8);
-                                },
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  child: Text("8",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          fontSize: 30,
-                                          fontWeight: FontWeight.w500,
-                                          fontFamily: 'Roboto')),
-                                  width: 50,
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                                    color: Color(0xFFd8f0fa),
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10)),
-                                  ),
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () {
-                                  numberPressed(9);
-                                  elementPassed(9);
-                                },
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  child: Text("9",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          fontSize: 30,
-                                          fontWeight: FontWeight.w500,
-                                          fontFamily: 'Roboto')),
-                                  width: 50,
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                                    color: Color(0xFFd8f0fa),
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10)),
-                                  ),
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () {
-                                  operatorPressed("/");
-                                  elementPassed("/");
-                                },
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  child: Text("/",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          fontSize: 30,
-                                          fontWeight: FontWeight.w500,
-                                          fontFamily: 'Roboto')),
-                                  width: 50,
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                                    color: Color(0xFFd8f0fa),
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10)),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          numberPressed(0);
-                          elementPassed(0);
-                        },
-                        child: Container(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Container(
-                                alignment: Alignment.center,
-                                child: Text("0",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 30,
-                                        fontWeight: FontWeight.w500,
-                                        fontFamily: 'Roboto')),
-                                width: 120,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                                  color: Color(0xFFd8f0fa),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(10)),
-                                ),
-                              ),
-                              // Container(
-                              //     width: 50,
-                              //     height: 50,
-                              //     color: Color.fromARGB(
-                              //         255, 92, 31, 52)),
-                              InkWell(
-                                onTap: () {
-                                  operatorPressed("%");
-                                  elementPassed("%");
-                                },
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  child: Text("%",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          fontSize: 30,
-                                          fontWeight: FontWeight.w500,
-                                          fontFamily: 'Roboto')),
-                                  width: 50,
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                                    color: Color(0xFFd8f0fa),
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10)),
-                                  ),
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () => calculateResult(),
-                                child: Container(
-                                  alignment: Alignment.center,
-                                  child: Text("=",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          fontSize: 30,
-                                          fontWeight: FontWeight.w500,
-                                          fontFamily: 'Roboto')),
-                                  width: 50,
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                                    color: Color(0xFFd8f0fa),
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(10)),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Flexible(
-                  flex: 2,
-                  child: Container(
-                    child: InkWell(
-                      onTap: () {
-                        operatorPressed("+");
-                        elementPassed("+");
-                      },
-                      child: Container(
-                        alignment: Alignment.center,
-                        child: Text("+",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: 30,
-                                fontWeight: FontWeight.w500,
-                                fontFamily: 'Roboto')),
-                        width: 50,
-                        height: 110,
-                        constraints: BoxConstraints(
-                          maxHeight: 150,
-                          maxWidth: 50,
-                        ),
-                        decoration: BoxDecoration(
-                          // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                          color: Color(0xFFd8f0fa),
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-              ],
+  Widget buildThirdRow() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          InkWell(
+            onTap: () {
+              numberPressed(4);
+              elementPassed(4);
+            },
+            child: Container(
+              alignment: Alignment.center,
+              child: Text("4",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Roboto')),
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                  // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                  color: Color(0xFFd8f0fa),
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
             ),
-          )),
-    );
-  }
-
-  Flexible buildThirdRow() {
-    return Flexible(
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            InkWell(
-              onTap: () {
-                numberPressed(4);
-                elementPassed(4);
-              },
-              child: Container(
-                alignment: Alignment.center,
-                child: Text("4",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto')),
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                    // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                    color: Color(0xFFd8f0fa),
-                    borderRadius: BorderRadius.all(Radius.circular(10))),
-              ),
+          ),
+          InkWell(
+            onTap: () {
+              numberPressed(5);
+              elementPassed(5);
+            },
+            child: Container(
+              alignment: Alignment.center,
+              child: Text("5",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Roboto')),
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                  // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                  color: Color(0xFFd8f0fa),
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
             ),
-            InkWell(
-              onTap: () {
-                numberPressed(5);
-                elementPassed(5);
-              },
-              child: Container(
-                alignment: Alignment.center,
-                child: Text("5",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto')),
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                    // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                    color: Color(0xFFd8f0fa),
-                    borderRadius: BorderRadius.all(Radius.circular(10))),
-              ),
+          ),
+          InkWell(
+            onTap: () {
+              numberPressed(6);
+              elementPassed(6);
+            },
+            child: Container(
+              alignment: Alignment.center,
+              child: Text("6",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Roboto')),
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                  // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                  color: Color(0xFFd8f0fa),
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
             ),
-            InkWell(
-              onTap: () {
-                numberPressed(6);
-                elementPassed(6);
-              },
-              child: Container(
-                alignment: Alignment.center,
-                child: Text("6",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto')),
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                    // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                    color: Color(0xFFd8f0fa),
-                    borderRadius: BorderRadius.all(Radius.circular(10))),
-              ),
+          ),
+          InkWell(
+            onTap: () {
+              operatorPressed("*");
+              elementPassed("*");
+            },
+            child: Container(
+              alignment: Alignment.center,
+              child: Text("*",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Roboto')),
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                  // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                  color: Color(0xFFd8f0fa),
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
             ),
-            InkWell(
-              onTap: () {
-                operatorPressed("*");
-                elementPassed("*");
-              },
-              child: Container(
-                alignment: Alignment.center,
-                child: Text("*",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto')),
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                    // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                    color: Color(0xFFd8f0fa),
-                    borderRadius: BorderRadius.all(Radius.circular(10))),
-              ),
+          ),
+          InkWell(
+            onTap: () {
+              operatorPressed("-");
+              elementPassed("-");
+            },
+            child: Container(
+              alignment: Alignment.center,
+              child: Text("−",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Roboto')),
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                  // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                  color: Color(0xFFd8f0fa),
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
             ),
-            InkWell(
-              onTap: () {
-                operatorPressed("-");
-                elementPassed("-");
-              },
-              child: Container(
-                alignment: Alignment.center,
-                child: Text("−",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto')),
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                    // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                    color: Color(0xFFd8f0fa),
-                    borderRadius: BorderRadius.all(Radius.circular(10))),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Flexible buildSecondRow() {
-    return Flexible(
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            InkWell(
-              onTap: () {
-                numberPressed(1);
-                elementPassed(1);
-              },
-              child: Container(
-                alignment: Alignment.center,
-                child: Text("1",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto')),
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                    // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                    color: Color(0xFFd8f0fa),
-                    borderRadius: BorderRadius.all(Radius.circular(10))),
-              ),
+  Widget buildSecondRow() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          InkWell(
+            onTap: () {
+              numberPressed(1);
+              elementPassed(1);
+            },
+            child: Container(
+              alignment: Alignment.center,
+              child: Text("1",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Roboto')),
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                  // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                  color: Color(0xFFd8f0fa),
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
             ),
-            InkWell(
-              onTap: () {
-                numberPressed(2);
-                elementPassed(2);
-              },
-              child: Container(
-                alignment: Alignment.center,
-                child: Text("2",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto')),
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                    // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                    color: Color(0xFFd8f0fa),
-                    borderRadius: BorderRadius.all(Radius.circular(10))),
-              ),
+          ),
+          InkWell(
+            onTap: () {
+              numberPressed(2);
+              elementPassed(2);
+            },
+            child: Container(
+              alignment: Alignment.center,
+              child: Text("2",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Roboto')),
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                  // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                  color: Color(0xFFd8f0fa),
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
             ),
-            InkWell(
-              onTap: () {
-                numberPressed(3);
-                elementPassed(3);
-              },
-              child: Container(
-                alignment: Alignment.center,
-                child: Text("3",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto')),
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                    // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                    color: Color(0xFFd8f0fa),
-                    borderRadius: BorderRadius.all(Radius.circular(10))),
-              ),
+          ),
+          InkWell(
+            onTap: () {
+              numberPressed(3);
+              elementPassed(3);
+            },
+            child: Container(
+              alignment: Alignment.center,
+              child: Text("3",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Roboto')),
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                  // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                  color: Color(0xFFd8f0fa),
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
             ),
-            InkWell(
-              onTap: () {
-                operatorPressed("(");
-                elementPassed("(");
-              },
-              child: Container(
-                alignment: Alignment.center,
-                child: Text("(",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto')),
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                    // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                    color: Color(0xFFd8f0fa),
-                    borderRadius: BorderRadius.all(Radius.circular(10))),
-              ),
+          ),
+          InkWell(
+            onTap: () {
+              operatorPressed("(");
+              elementPassed("(");
+            },
+            child: Container(
+              alignment: Alignment.center,
+              child: Text("(",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Roboto')),
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                  // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                  color: Color(0xFFd8f0fa),
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
             ),
-            InkWell(
-              onTap: () {
-                operatorPressed(")");
-                elementPassed(")");
-              },
-              child: Container(
-                alignment: Alignment.center,
-                child: Text(")",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto')),
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                    // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                    color: Color(0xFFd8f0fa),
-                    borderRadius: BorderRadius.all(Radius.circular(10))),
-              ),
+          ),
+          InkWell(
+            onTap: () {
+              operatorPressed(")");
+              elementPassed(")");
+            },
+            child: Container(
+              alignment: Alignment.center,
+              child: Text(")",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Roboto')),
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                  // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                  color: Color(0xFFd8f0fa),
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Flexible _buildMathematicalOperation() {
-    return Flexible(
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            InkWell(
-              //onTap: () => clear(),
-              child: Container(
-                alignment: Alignment.center,
-                child: IconButton(
-                    onPressed: () {
-                      del();
-                    },
-                    icon: Icon(Icons.backspace)),
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                    // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                    color: Color(0xFFd8f0fa),
-                    borderRadius: BorderRadius.all(Radius.circular(10))),
-              ),
+  Widget _buildMathematicalOperation() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          InkWell(
+            //onTap: () => clear(),
+            child: Container(
+              alignment: Alignment.center,
+              child: IconButton(
+                  onPressed: () {
+                    del();
+                  },
+                  icon: Icon(Icons.backspace)),
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                  // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                  color: Color(0xFFd8f0fa),
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
             ),
-            InkWell(
-              onTap: () => clear(),
-              child: Container(
-                alignment: Alignment.center,
-                child: Text("C",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto')),
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                    // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                    color: Color(0xFFd8f0fa),
-                    borderRadius: BorderRadius.all(Radius.circular(10))),
-              ),
+          ),
+          InkWell(
+            onTap: () => clear(),
+            child: Container(
+              alignment: Alignment.center,
+              child: Text("C",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Roboto')),
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                  // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                  color: Color(0xFFd8f0fa),
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
             ),
-            InkWell(
-              onTap: () => addInMemory(),
-              child: Container(
-                alignment: Alignment.center,
-                child: Text("M+",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto')),
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                    // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                    color: Color(0xFFd8f0fa),
-                    borderRadius: BorderRadius.all(Radius.circular(10))),
-              ),
+          ),
+          InkWell(
+            onTap: () => addInMemory(),
+            child: Container(
+              alignment: Alignment.center,
+              child: Text("M+",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Roboto')),
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                  // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                  color: Color(0xFFd8f0fa),
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
             ),
-            InkWell(
-              onTap: () => removeInMemory(),
-              child: Container(
-                alignment: Alignment.center,
-                child: Text("M-",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto')),
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                    // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                    color: Color(0xFFd8f0fa),
-                    borderRadius: BorderRadius.all(Radius.circular(10))),
-              ),
+          ),
+          InkWell(
+            onTap: () => removeInMemory(),
+            child: Container(
+              alignment: Alignment.center,
+              child: Text("M-",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Roboto')),
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                  // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                  color: Color(0xFFd8f0fa),
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
             ),
-            InkWell(
-              onTap: () => getInMemory(),
-              child: Container(
-                alignment: Alignment.center,
-                child: Text("MR",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Roboto')),
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                    // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                    color: Color(0xFFd8f0fa),
-                    borderRadius: BorderRadius.all(Radius.circular(10))),
-              ),
+          ),
+          InkWell(
+            onTap: () => getInMemory(),
+            child: Container(
+              alignment: Alignment.center,
+              child: Text("MR",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Roboto')),
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                  // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                  color: Color(0xFFd8f0fa),
+                  borderRadius: BorderRadius.all(Radius.circular(10))),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
