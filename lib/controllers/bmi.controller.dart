@@ -5,8 +5,14 @@ import 'package:http/http.dart' as http;
 
 class BmiController extends ChangeNotifier {
   //https://bmi-express-app.herokuapp.com/api/0/0/34/343
-  var bmi;
-  var category;
+  var bmi='';
+  var category='';
+  clear() {
+    bmi = 
+    '';
+    category = '';
+    notifyListeners();
+  }
 
   calculateBmi(var height, var weight) async {
     var url = new Uri.https(

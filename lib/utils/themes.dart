@@ -8,6 +8,8 @@ ThemeData appTheme = ThemeData(
         FloatingActionButtonThemeData(backgroundColor: Colors.black),
 
   cardTheme: CardTheme(surfaceTintColor: Colors.purple,elevation: 10),
+  scaffoldBackgroundColor: Color(0xffdddddd) ,
+ // backgroundColor: Color(0xffdddddd) ,
   
   iconTheme: IconThemeData(
       color: Colors.black,
@@ -29,11 +31,13 @@ ThemeData appTheme = ThemeData(
 
 
 ThemeData darkTheme = ThemeData(
+   backgroundColor: Color.fromARGB(255, 72, 67, 144),
+     scaffoldBackgroundColor:  Colors.grey,
   floatingActionButtonTheme: FloatingActionButtonThemeData(backgroundColor: Colors.black),
     cardTheme: CardTheme(surfaceTintColor: Colors.purple, elevation: 10),
     
     iconTheme: IconThemeData(
-      color: Colors.white,
+     // color: Colors.white,
     ),
     primaryColor: Color.fromARGB(255, 13, 13, 14),
     listTileTheme: ListTileThemeData(

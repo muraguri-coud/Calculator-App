@@ -29,7 +29,20 @@ class MyCalculatorApp extends StatefulWidget {
   State<MyCalculatorApp> createState() => _MyCalculatorAppState();
 }
 
-class _MyCalculatorAppState extends State<MyCalculatorApp> {
+class _MyCalculatorAppState extends State<MyCalculatorApp>
+    with SingleTickerProviderStateMixin {
+  late TabController tabController;
+  @override
+  void initState() {
+    tabController = TabController(length: 2, vsync: this);
+    tabController.addListener(() {
+      print("hello");
+      WidgetsBinding.instance.focusManager.primaryFocus?.unfocus();
+    });
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<ThemeController>(
@@ -41,8 +54,10 @@ class _MyCalculatorAppState extends State<MyCalculatorApp> {
             showSemanticsDebugger: false,
             theme: themeController.themeData,
             home: Scaffold(
-              backgroundColor:  Color(0xffdddddd),
               
+                //backgroundColor: Theme.of(context).primaryColor,
+                 // backgroundColor: Color(0xffdddddd),
+                resizeToAvoidBottomInset: false,
 
                 // drawer: Container(width: 100,color: Colors.white,),
                 floatingActionButton: FloatingActionButton(
@@ -54,39 +69,38 @@ class _MyCalculatorAppState extends State<MyCalculatorApp> {
                       : Icons.dark_mode),
                 ),
                 body: SafeArea(
-                  
                     child: DefaultTabController(
                         length: 2,
                         child: Column(
                           children: [
                             Container(
-                            
-                              height: 40,
+                              height: 80,
                               child: AppBar(
-                                bottom: TabBar(tabs: [
+                                toolbarHeight:100 ,
+                                
+                                bottom:
+                                    TabBar(controller: tabController, tabs: [
                                   Container(
                                     //color: Colors.white,
                                     child: Text(
                                       "Calculations",
-                                      style: TextStyle(
-                                         ),
+                                      style: TextStyle(),
                                     ),
                                     alignment: Alignment.center,
                                   ),
                                   Container(
-                                   // color: Colors.white,
+                                    // color: Colors.white,
                                     child: Text(
                                       "BMI",
-                                      style: TextStyle(
-                                        ),
+                                      style: TextStyle(),
                                     ),
                                     alignment: Alignment.center,
                                   ),
                                 ]),
                                 backgroundColor: Color(0xff500cd0),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(bottom: Radius.circular(300)))
-                                ,
-                                
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.vertical(
+                                        bottom: Radius.circular(300))),
                                 elevation: 0,
                                 centerTitle: true,
                                 title: Text(
@@ -97,8 +111,10 @@ class _MyCalculatorAppState extends State<MyCalculatorApp> {
                             ),
                             Expanded(
                               child: TabBarView(
-                                children: [ const Calculator(),
-                                   Bmi(),
+                                controller: tabController,
+                                children: [
+                                  const Calculator(),
+                                  Bmi(),
                                 ],
                               ),
                             ),
@@ -114,7 +130,7 @@ class _MyCalculatorAppState extends State<MyCalculatorApp> {
                 onPressed: () {},
                 child: Icon(Icons.light_mode),
               ),
-              body: SafeArea(child:  Bmi()))),
+              body: SafeArea(child: Bmi()))),
     );
   }
 }
