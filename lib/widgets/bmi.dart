@@ -2,21 +2,21 @@
 
 import 'package:calculator/controllers/bmi.controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:provider/provider.dart';
 
 class Bmi extends StatelessWidget {
-    TextEditingController weightController = TextEditingController(text: "0");
+  TextEditingController weightController = TextEditingController(text: "0");
   TextEditingController heightController = TextEditingController(text: "0");
-   Bmi({super.key});
+  Bmi({super.key});
 
   @override
   Widget build(BuildContext context) {
-  
     return Container(
-      //margin: EdgeInsets.all(10.0),
+      margin: EdgeInsets.fromLTRB(35, 5, 35, 10),
       alignment: Alignment.center,
-      color: Color(0xFFe4e4e4),
+     // color: Color(0xFFe4e4e4),
       child: ChangeNotifierProvider(
         create: (context) => BmiController(),
         builder: (context, child) {
@@ -90,6 +90,10 @@ class Bmi extends StatelessWidget {
                       margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
                       child: TextFormField(
                         controller: weightController,
+                         keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp("[0-9]"))
+                        ],
                         decoration: InputDecoration(
                           enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.0),
@@ -102,7 +106,7 @@ class Bmi extends StatelessWidget {
                           // border: OutlineInputBorder(
                           //     borderRadius: BorderRadius.all(Radius.circular(10)),
                           //     ),
-                          hintText: '160',
+                          hintText: 'weight in kgs',
 
                           // labelText: 'Height *',
                         ),
@@ -114,6 +118,8 @@ class Bmi extends StatelessWidget {
                       margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
                       child: TextFormField(
                         controller: heightController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [FilteringTextInputFormatter.allow(RegExp("[0-9]"))],
                         decoration: InputDecoration(
                           enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.0),
@@ -126,7 +132,7 @@ class Bmi extends StatelessWidget {
                           // border: OutlineInputBorder(
                           //     borderRadius: BorderRadius.all(Radius.circular(10)),
                           //     ),
-                          hintText: '101.2',
+                          hintText: 'Height in cms',
 
                           // labelText: 'Height *',
                         ),
@@ -163,8 +169,8 @@ class Bmi extends StatelessWidget {
                           backgroundColor: Color(0xFFd6d6d6),
                         ),
                         onPressed: () {
-                                    bmiController.calculateBmi(heightController.text, weightController.text);
-
+                          bmiController.calculateBmi(
+                              heightController.text, weightController.text);
                         },
                         child: Text(
                           'Calculate MY BMI',
@@ -190,7 +196,11 @@ class Bmi extends StatelessWidget {
                         elevation: 10,
                         backgroundColor: Color(0xFFf4f4f4),
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        heightController.clear();
+                        weightController.clear();
+                        bmiController.clear();
+                      },
                       child: Text(
                         'Reset',
                         style:
@@ -212,6 +222,7 @@ class Bmi extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Neumorphic(
+                      margin: EdgeInsets.only(top: 10),
                       style: NeumorphicStyle(
                           surfaceIntensity: 5,
                           intensity: 5,
@@ -246,6 +257,7 @@ class Bmi extends StatelessWidget {
               Row(children: [
                 Expanded(
                   child: Neumorphic(
+                    margin: EdgeInsets.only(top: 20),
                     style: NeumorphicStyle(
                         surfaceIntensity: 5,
                         intensity: 5,
@@ -268,7 +280,7 @@ class Bmi extends StatelessWidget {
                         height: 45.0,
                         padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
                         child: Text(
-                         '${bmiController.category}',
+                          '${bmiController.category}',
                           style: TextStyle(
                             fontSize: 20,
                             color: Color(0xFF363636),

@@ -250,6 +250,7 @@ class _CalculatorState extends State<Calculator> {
           Flexible(
               flex: 3,
               child: Container(
+                
                 width: double.maxFinite,
                 //image: AssetImage(AssetImageHelper.backgroud_image))),
                 // color: Color(0xFF8dd8f7),
@@ -258,6 +259,7 @@ class _CalculatorState extends State<Calculator> {
                   Flexible(child: buildSecondRow()),
                   Flexible(child: buildThirdRow()),
                   Container(
+                    
                     //color: Colors.amber,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -350,47 +352,11 @@ class _CalculatorState extends State<Calculator> {
                                     ),
                                     InkWell(
                                       onTap: () {
-                                        numberPressed(8);
-                                        elementPassed(8);
-                                      },
-                                      child: Neumorphic(
-                                        
-                                       style: NeumorphicStyle(
-                                            surfaceIntensity: 5,
-                                            intensity: 5,
-                                            shape: NeumorphicShape.concave,
-                                            boxShape:
-                                                NeumorphicBoxShape.roundRect(
-                                                    BorderRadius.circular(12)),
-                                            depth: -10,
-                                            lightSource: LightSource.topLeft,
-                                            color: Color(0xfff2f2f2)),
-                                          
-                                        child: Container(
-                                          alignment: Alignment.center,
-                                          width: 50,
-                                          height: 50,
-                                          child: Text("8",
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                  fontSize: 30,
-                                                  fontWeight: FontWeight.w500,
-                                                  fontFamily: 'Roboto')),
-                                          decoration: BoxDecoration(
-                                              // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
-                                             // color: Color(0xFFd8f0fa),
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(10))),
-                                        ),
-                                      ),
-                                    ),
-                                    InkWell(
-                                      onTap: () {
-                                        numberPressed(9);
+                                         numberPressed(9);
                                         elementPassed(9);
                                       },
                                       child: Neumorphic(
-                                         
+                                        
                                        style: NeumorphicStyle(
                                             surfaceIntensity: 5,
                                             intensity: 5,
@@ -420,11 +386,46 @@ class _CalculatorState extends State<Calculator> {
                                         ),
                                       ),
                                     ),
+                                    InkWell(
+                                      onTap: () {
+                                        elementPassed("/");
+                                      },
+                                      child: Neumorphic(
+                                         
+                                       style: NeumorphicStyle(
+                                            surfaceIntensity: 5,
+                                            intensity: 5,
+                                            shape: NeumorphicShape.concave,
+                                            boxShape:
+                                                NeumorphicBoxShape.roundRect(
+                                                    BorderRadius.circular(12)),
+                                            depth: -10,
+                                            lightSource: LightSource.topLeft,
+                                            color: Color(0xfff2f2f2)),
+                                          
+                                        child: Container(
+                                          alignment: Alignment.center,
+                                          width: 50,
+                                          height: 50,
+                                          child: Text("/",
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                  fontSize: 30,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontFamily: 'Roboto')),
+                                          decoration: BoxDecoration(
+                                              // border: Border(top:BorderSide(color: Colors.black ,width: 3)),
+                                             // color: Color(0xFFd8f0fa),
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(10))),
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
                               Container(
-                                // color: Color.fromARGB(255, 42, 119, 65),
+                                 //color: Color.fromARGB(255, 42, 119, 65),
                                 width: double.maxFinite,
                                 height: 60,
                                 child: Row(
@@ -451,7 +452,7 @@ class _CalculatorState extends State<Calculator> {
                                           
                                         child: Container(
                                           alignment: Alignment.center,
-                                          width: 120,
+                                          width: 100,
                                           height: 50,
                                           child: Text("0",
                                               textAlign: TextAlign.center,
